@@ -1,13 +1,27 @@
 name: build
 
 on:
-  push:
-  pull_request:
-  schedule:
-    - cron: '0 0 1 * *'
+  workflow_dispatch:
+    inputs:
+      buildLinux:
+        description: 'Build Linux'
+        required: true
+        default: false
+        type: boolean
+      buildMacOS:
+        description: 'Build MacOS'
+        required: true
+        default: false
+        type: boolean
+      buildWindows:
+        description: 'Build Windows'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   build-linux-ubuntu:
+    if: github.event.inputs.buildLinux == 'true'
     runs-on: ubuntu-latest
     steps:
     - name: install dependencies
@@ -49,6 +63,7 @@ jobs:
         name: libimobiledevice-glue-latest_${{env.target_triplet}}
         path: libimobiledevice-glue.tar
   build-macOS:
+    if: github.event.inputs.buildMacOS == 'true'
     runs-on: macOS-latest
     steps:
     - name: install dependencies
@@ -102,6 +117,7 @@ jobs:
         name: libimobiledevice-glue-latest_macOS
         path: libimobiledevice-glue.tar
   build-windows:
+    if: github.event.inputs.buildWindows == 'true'
     runs-on: windows-2019
     defaults:
       run:
@@ -111,6 +127,7 @@ jobs:
       matrix:
         include: [
           { msystem: MINGW64, arch: x86_64 },
+          { msystem: MINGW64, arch: cross-mingwarm64 },
           { msystem: MINGW32, arch: i686   }
         ]
     steps:
